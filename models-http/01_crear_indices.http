@@ -1,0 +1,262 @@
+### 1. PELICULAS
+PUT peliculas
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "analysis": {
+      "normalizer": {
+        "minusculas": {
+          "type": "custom",
+          "filter": ["lowercase", "asciifolding"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "pelicula_id": { "type": "keyword" },
+      "poster_url": { "type": "keyword", "ignore_above": 2048 },
+      "titulo": {
+        "type": "text",
+        "analyzer": "spanish",
+        "fields": { "raw": { "type": "keyword", "normalizer": "minusculas" } }
+      },
+      "titulos_alternativos": {
+        "type": "text",
+        "analyzer": "spanish",
+        "fields": { "raw": { "type": "keyword", "normalizer": "minusculas" } }
+      },
+      "duracion_minutos": { "type": "short" },
+      "genero": {
+        "type": "text",
+        "analyzer": "spanish",
+        "fields": { "raw": { "type": "keyword", "normalizer": "minusculas" } }
+      },
+      "anio_publicacion": { "type": "short" },
+      "oscars": {
+        "properties": {
+          "nominaciones": {
+            "type": "text",
+            "analyzer": "spanish",
+            "fields": { "raw": { "type": "keyword", "normalizer": "minusculas" } }
+          },
+          "ganados": {
+            "type": "text",
+            "analyzer": "spanish",
+            "fields": { "raw": { "type": "keyword", "normalizer": "minusculas" } }
+          },
+          "cantidad_nominaciones": { "type": "short" },
+          "cantidad_ganados": { "type": "short" }
+        }
+      },
+      "actores_principales": {
+        "type": "text",
+        "analyzer": "spanish",
+        "fields": { "raw": { "type": "keyword", "normalizer": "minusculas" } }
+      },
+      "costo_unitario_bs": { "type": "scaled_float", "scaling_factor": 100 },
+      "unidades_adquiridas": { "type": "integer" },
+      "fecha_creacion": { "type": "date" },
+      "fecha_actualizacion": { "type": "date" }
+    }
+  }
+}
+
+### 2. COPIAS FISICAS
+PUT copias
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "copia_id": { "type": "keyword" },
+      "codigo_interno": { "type": "keyword" },
+      "pelicula_id": { "type": "keyword" },
+      "pelicula": {
+        "properties": {
+          "titulo": { "type": "keyword" },
+          "genero": { "type": "keyword" }
+        }
+      },
+      "fecha_adquisicion": { "type": "date", "format": "strict_date||strict_date_time" },
+      "costo_adquisicion_bs": { "type": "scaled_float", "scaling_factor": 100 },
+      "estado": { "type": "keyword" },
+      "prestamo_actual_id": { "type": "keyword" },
+      "baja": {
+        "properties": {
+          "fecha": { "type": "date", "format": "strict_date||strict_date_time" },
+          "razon": { "type": "keyword" },
+          "detalle": { "type": "text", "analyzer": "spanish" }
+        }
+      },
+      "fecha_actualizacion": { "type": "date" }
+    }
+  }
+}
+
+### 3. CLIENTES
+PUT clientes
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "analysis": {
+      "normalizer": {
+        "minusculas": {
+          "type": "custom",
+          "filter": ["lowercase", "asciifolding"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "cliente_id": { "type": "keyword" },
+      "nombre_completo": {
+        "type": "text",
+        "analyzer": "spanish",
+        "fields": { "raw": { "type": "keyword", "normalizer": "minusculas" } }
+      },
+      "telefono_celular": { "type": "keyword" },
+      "correo_electronico": { "type": "keyword", "normalizer": "minusculas" },
+      "fecha_nacimiento": { "type": "date", "format": "strict_date" },
+      "direccion": {
+        "properties": {
+          "texto": { "type": "text", "analyzer": "spanish" },
+          "ciudad": { "type": "keyword", "normalizer": "minusculas" },
+          "zona": { "type": "keyword", "normalizer": "minusculas" },
+          "ubicacion": { "type": "geo_point" }
+        }
+      },
+      "fecha_registro": { "type": "date" },
+      "estado": { "type": "keyword" },
+      "bloqueo_actual": {
+        "properties": {
+          "fecha": { "type": "date" },
+          "razon": { "type": "keyword" },
+          "detalle": { "type": "text", "analyzer": "spanish" }
+        }
+      },
+      "historial_bloqueos": {
+        "type": "nested",
+        "properties": {
+          "fecha_bloqueo": { "type": "date" },
+          "fecha_desbloqueo": { "type": "date" },
+          "razon": { "type": "keyword" },
+          "detalle": { "type": "text", "analyzer": "spanish" }
+        }
+      },
+      "fecha_actualizacion": { "type": "date" }
+    }
+  }
+}
+
+### 4. CONFIGURACIONES VERSIONADAS
+PUT configuraciones
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "configuracion_id": { "type": "keyword" },
+      "version": { "type": "integer" },
+      "activa": { "type": "boolean" },
+      "vigente_desde": { "type": "date" },
+      "vigente_hasta": { "type": "date" },
+      "moneda": { "type": "keyword" },
+      "maximo_dias_prestamo": { "type": "short" },
+      "tarifas": {
+        "type": "nested",
+        "properties": {
+          "dias": { "type": "short" },
+          "costo_bs": { "type": "scaled_float", "scaling_factor": 100 }
+        }
+      },
+      "descuentos": {
+        "type": "nested",
+        "properties": {
+          "cantidad_minima": { "type": "short" },
+          "cantidad_maxima": { "type": "short" },
+          "porcentaje": { "type": "scaled_float", "scaling_factor": 100 }
+        }
+      },
+      "fecha_creacion": { "type": "date" }
+    }
+  }
+}
+
+### 5. PRESTAMOS Y FACTURAS
+PUT prestamos
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "analysis": {
+      "normalizer": {
+        "minusculas": {
+          "type": "custom",
+          "filter": ["lowercase", "asciifolding"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "prestamo_id": { "type": "keyword" },
+      "cliente_id": { "type": "keyword" },
+      "cliente": {
+        "properties": {
+          "nombre_completo": { "type": "keyword", "normalizer": "minusculas" },
+          "telefono_celular": { "type": "keyword" },
+          "correo_electronico": { "type": "keyword", "normalizer": "minusculas" }
+        }
+      },
+      "fecha_prestamo": { "type": "date" },
+      "fecha_devolucion_prevista": { "type": "date" },
+      "fecha_devolucion_real": { "type": "date" },
+      "duracion_dias": { "type": "short" },
+      "estado": { "type": "keyword" },
+      "configuracion_id": { "type": "keyword" },
+      "configuracion_version": { "type": "integer" },
+      "items": {
+        "type": "nested",
+        "properties": {
+          "copia_id": { "type": "keyword" },
+          "codigo_interno": { "type": "keyword" },
+          "pelicula_id": { "type": "keyword" },
+          "titulo": { "type": "keyword" },
+          "genero": { "type": "keyword" },
+          "tarifa_bs": { "type": "scaled_float", "scaling_factor": 100 },
+          "fecha_devolucion_real": { "type": "date" },
+          "estado": { "type": "keyword" }
+        }
+      },
+      "cantidad_peliculas": { "type": "short" },
+      "subtotal_bs": { "type": "scaled_float", "scaling_factor": 100 },
+      "descuento_porcentaje": { "type": "scaled_float", "scaling_factor": 100 },
+      "descuento_bs": { "type": "scaled_float", "scaling_factor": 100 },
+      "total_bs": { "type": "scaled_float", "scaling_factor": 100 },
+      "factura": {
+        "properties": {
+          "numero": { "type": "keyword" },
+          "fecha_emision": { "type": "date" },
+          "nit_ci": { "type": "keyword" },
+          "razon_social": { "type": "keyword" },
+          "importe_total_bs": { "type": "scaled_float", "scaling_factor": 100 }
+        }
+      },
+      "fecha_creacion": { "type": "date" },
+      "fecha_actualizacion": { "type": "date" }
+    }
+  }
+}

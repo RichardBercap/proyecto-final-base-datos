@@ -1,0 +1,19 @@
+### Agregar poster_url opcional a peliculas existentes
+### Ejecutar solo si el indice peliculas ya fue creado antes de este cambio.
+PUT peliculas/_mapping
+{
+  "properties": {
+    "poster_url": {
+      "type": "keyword",
+      "ignore_above": 2048
+    }
+  }
+}
+
+### Ejemplo: actualizar una pelicula con portada
+POST peliculas/_update/PEL-001
+{
+  "doc": {
+    "poster_url": "https://example.com/posters/pel-001.jpg"
+  }
+}

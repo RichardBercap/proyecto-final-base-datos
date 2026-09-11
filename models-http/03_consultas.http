@@ -1,0 +1,150 @@
+### Verificar indices
+GET _cat/indices/peliculas,copias,clientes,prestamos,configuraciones?v
+
+### Buscar pelicula por titulo o titulo alternativo
+GET peliculas/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "godfather",
+      "fields": ["titulo^3", "titulos_alternativos^2"]
+    }
+  }
+}
+
+### Buscar por titulo, genero, actor o nominacion/premio Oscar
+GET peliculas/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "mejor pelicula",
+      "fields": [
+        "titulo^4",
+        "titulos_alternativos^3",
+        "genero^2",
+        "actores_principales^2",
+        "oscars.nominaciones",
+        "oscars.ganados"
+      ]
+    }
+  }
+}
+
+### Buscar peliculas de un genero exacto
+GET peliculas/_search
+{
+  "query": {
+    "term": { "genero.raw": "drama" }
+  }
+}
+
+### Obtener copias disponibles de una pelicula
+GET copias/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "pelicula_id": "PEL-001" } },
+        { "term": { "estado": "disponible" } }
+      ]
+    }
+  }
+}
+
+### Comprobar si el cliente puede alquilar
+GET clientes/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "cliente_id": "CLI-001" } },
+        { "term": { "estado": "activo" } }
+      ]
+    }
+  }
+}
+
+### Obtener configuracion activa
+GET configuraciones/_search
+{
+  "size": 1,
+  "query": { "term": { "activa": true } },
+  "sort": [{ "version": "desc" }]
+}
+
+### Prestamos activos de un cliente
+GET prestamos/_search
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "term": { "cliente_id": "CLI-001" } },
+        { "term": { "estado": "activo" } }
+      ]
+    }
+  },
+  "sort": [{ "fecha_prestamo": "desc" }]
+}
+
+### Buscar prestamos que contengan una pelicula concreta
+GET prestamos/_search
+{
+  "query": {
+    "nested": {
+      "path": "items",
+      "query": {
+        "bool": {
+          "filter": [
+            { "term": { "items.pelicula_id": "PEL-002" } },
+            { "term": { "items.estado": "prestada" } }
+          ]
+        }
+      },
+      "inner_hits": {}
+    }
+  }
+}
+
+### Clientes ubicados a menos de 5 km de un punto
+GET clientes/_search
+{
+  "query": {
+    "geo_distance": {
+      "distance": "5km",
+      "direccion.ubicacion": {
+        "lat": -16.5000,
+        "lon": -68.1350
+      }
+    }
+  }
+}
+
+### Cantidad de copias por estado
+GET copias/_search
+{
+  "size": 0,
+  "aggs": {
+    "copias_por_estado": {
+      "terms": { "field": "estado" }
+    }
+  }
+}
+
+### Leer una copia obteniendo seq_no y primary_term para concurrencia optimista
+GET copias/_doc/COP-001?seq_no_primary_term=true
+
+### Ejemplo: reservar la copia solo si no fue modificada desde la lectura anterior
+### Sustituir 0 y 1 por _seq_no y _primary_term devueltos por el GET.
+PUT copias/_doc/COP-001?if_seq_no=0&if_primary_term=1
+{
+  "copia_id": "COP-001",
+  "codigo_interno": "DVD-0001",
+  "pelicula_id": "PEL-001",
+  "pelicula": { "titulo": "El padrino", "genero": "Drama" },
+  "fecha_adquisicion": "2026-09-09",
+  "costo_adquisicion_bs": 70.00,
+  "estado": "prestada",
+  "prestamo_actual_id": "PRE-002",
+  "fecha_actualizacion": "2026-09-09T13:00:00Z"
+}
+
