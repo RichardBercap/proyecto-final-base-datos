@@ -51,9 +51,13 @@ export const useClientsStore = defineStore('clients', () => {
       return client
     })
 
-  const unblockClientPlaceholder = async () => {
-    throw new Error('TODO: el backend aun no expone PATCH /api/clientes/:id/desbloquear')
-  }
+  const unblockClient = (id: string) =>
+    run(async () => {
+      const client = await clientsService.unblock(id)
+      await fetchClients()
+      selectedClient.value = client
+      return client
+    })
 
   return {
     clients,
@@ -66,6 +70,6 @@ export const useClientsStore = defineStore('clients', () => {
     fetchClient,
     saveClient,
     blockClient,
-    unblockClientPlaceholder
+    unblockClient
   }
 })

@@ -34,15 +34,9 @@ const block = async () => {
 }
 
 const unblock = async () => {
-  try {
-    await clientsStore.unblockClientPlaceholder()
-  } catch (error) {
-    uiStore.notify({
-      title: 'Acción pendiente',
-      description: error instanceof Error ? error.message : 'Endpoint no disponible',
-      variant: 'error'
-    })
-  }
+  if (!clientsStore.selectedClient) return
+  await clientsStore.unblockClient(clientsStore.selectedClient.cliente_id)
+  uiStore.notify({ title: 'Cliente desbloqueado', variant: 'success' })
 }
 </script>
 
@@ -52,8 +46,15 @@ const unblock = async () => {
       <RouterLink v-if="clientsStore.selectedClient" :to="`/clients/${clientsStore.selectedClient.cliente_id}/edit`">
         <Button variant="ghost">Editar</Button>
       </RouterLink>
-      <Button v-if="clientsStore.selectedClient?.estado !== 'bloqueado'" variant="danger" @click="blockDialogOpen = true">Bloquear</Button>
-      <Button v-else variant="secondary" @click="unblock">Desbloquear</Button>
+      <Button
+        v-if="clientsStore.selectedClient?.estado !== 'bloqueado'"
+        variant="danger"
+        :disabled="clientsStore.loading"
+        @click="blockDialogOpen = true"
+      >
+        Bloquear
+      </Button>
+      <Button v-else variant="secondary" :disabled="clientsStore.loading" @click="unblock">Desbloquear</Button>
     </template>
   </PageHeader>
 
@@ -86,7 +87,11 @@ const unblock = async () => {
           :key="`${blockItem.fecha_bloqueo}-${blockItem.razon}`"
           class="rounded-xl bg-white/5 p-4 text-sm text-slate-300"
         >
-          {{ blockItem.razon }} · {{ blockItem.detalle }}
+          <p>{{ blockItem.razon }} · {{ blockItem.detalle }}</p>
+          <p class="mt-2 text-xs text-slate-500">
+            Bloqueo: {{ formatDate(blockItem.fecha_bloqueo || blockItem.fecha) }}
+            <span v-if="blockItem.fecha_desbloqueo"> · Desbloqueo: {{ formatDate(blockItem.fecha_desbloqueo) }}</span>
+          </p>
         </div>
         <p v-if="clientsStore.selectedClient.historial_bloqueos.length === 0" class="text-sm text-slate-400">
           Sin eventos históricos registrados.
@@ -116,7 +121,7 @@ const unblock = async () => {
       </div>
       <div class="mt-5 flex justify-end gap-3">
         <Button variant="ghost" @click="blockDialogOpen = false">Cancelar</Button>
-        <Button variant="danger" @click="block">Confirmar bloqueo</Button>
+        <Button variant="danger" :disabled="clientsStore.loading" @click="block">Confirmar bloqueo</Button>
       </div>
     </Card>
   </div>

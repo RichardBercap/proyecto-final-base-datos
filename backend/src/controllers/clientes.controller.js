@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const {
+  elasticsearch,
   searchAll,
   getById,
   createDocument,
@@ -84,10 +85,53 @@ const bloquearCliente = async (req, res) => {
   res.json(updated);
 };
 
+const desbloquearCliente = async (req, res) => {
+  const now = new Date().toISOString();
+  const cliente = await getById(INDEX, req.params.id);
+
+  if (cliente.estado !== 'bloqueado') {
+    throw new HttpError(409, `El cliente no esta bloqueado. Estado actual: ${cliente.estado}`);
+  }
+
+  const historialBloqueos = (cliente.historial_bloqueos || []).map((item, index, history) => {
+    const isLastOpenBlock = index === history.length - 1 && !item.fecha_desbloqueo;
+    return isLastOpenBlock
+      ? {
+          ...item,
+          fecha_desbloqueo: now
+        }
+      : item;
+  });
+
+  await elasticsearch.update({
+    index: INDEX,
+    id: req.params.id,
+    script: {
+      source: `
+        ctx._source.estado = params.estado;
+        ctx._source.historial_bloqueos = params.historial_bloqueos;
+        ctx._source.fecha_actualizacion = params.fecha_actualizacion;
+        ctx._source.remove('bloqueo_actual');
+      `,
+      params: {
+        estado: 'activo',
+        historial_bloqueos: historialBloqueos,
+        fecha_actualizacion: now
+      }
+    },
+    refresh: true,
+    retry_on_conflict: 3
+  });
+
+  const updated = await getById(INDEX, req.params.id);
+  res.json(updated);
+};
+
 module.exports = {
   listClientes,
   getCliente,
   createCliente,
   updateCliente,
-  bloquearCliente
+  bloquearCliente,
+  desbloquearCliente
 };

@@ -24,5 +24,9 @@ export const clientsService = {
       detalle: detail
     })
     return data
+  },
+  async unblock(id: string) {
+    const { data } = await http.patch<Client>(`/clientes/${id}/desbloquear`)
+    return data
   }
 }

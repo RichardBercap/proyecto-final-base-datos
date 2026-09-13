@@ -37,11 +37,7 @@ const getById = async (index, id) => {
 
 const getHitById = async (index, id) => {
   try {
-    return await elasticsearch.get({
-      index,
-      id,
-      seq_no_primary_term: true
-    });
+    return await elasticsearch.get({ index, id });
   } catch (error) {
     if (error.meta && error.meta.statusCode === 404) {
       throw new HttpError(404, `No se encontro el documento ${id} en ${index}`);
