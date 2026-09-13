@@ -96,16 +96,40 @@ const searchPeliculas = async (req, res) => {
 
   const peliculas = await searchAll(INDEX, {
     query: {
-      multi_match: {
-        query: q,
-        fields: [
-          'titulo^4',
-          'titulos_alternativos^3',
-          'genero^2',
-          'actores_principales^2',
-          'oscars.nominaciones',
-          'oscars.ganados'
-        ]
+      bool: {
+        should: [
+          {
+            multi_match: {
+              query: q,
+              type: 'phrase_prefix',
+              fields: [
+                'titulo^5',
+                'titulos_alternativos^4',
+                'genero^2',
+                'actores_principales^2',
+                'oscars.nominaciones',
+                'oscars.ganados'
+              ]
+            }
+          },
+          {
+            multi_match: {
+              query: q,
+              fields: [
+                'titulo^4',
+                'titulos_alternativos^3',
+                'genero^2',
+                'actores_principales^2',
+                'oscars.nominaciones',
+                'oscars.ganados'
+              ],
+              fuzziness: 'AUTO',
+              prefix_length: 1,
+              operator: 'and'
+            }
+          }
+        ],
+        minimum_should_match: 1
       }
     }
   });

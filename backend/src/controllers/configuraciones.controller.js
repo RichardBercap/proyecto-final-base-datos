@@ -9,6 +9,20 @@ const HttpError = require('../utils/httpError');
 const INDEX = 'configuraciones';
 
 const generateId = () => `CFG-${crypto.randomUUID()}`;
+const DEFAULT_GENEROS = [
+  'Accion',
+  'Aventura',
+  'Animacion',
+  'Ciencia ficcion',
+  'Comedia',
+  'Crimen',
+  'Documental',
+  'Drama',
+  'Fantasia',
+  'Terror',
+  'Romance',
+  'Suspenso'
+];
 
 const getConfiguracionActiva = async (req, res) => {
   const [configuracion] = await searchAll(INDEX, {
@@ -55,6 +69,7 @@ const createConfiguracion = async (req, res) => {
     vigente_desde: req.body.vigente_desde || now,
     moneda: req.body.moneda || 'BOB',
     maximo_dias_prestamo: req.body.maximo_dias_prestamo || 5,
+    generos: Array.isArray(req.body.generos) && req.body.generos.length > 0 ? req.body.generos : DEFAULT_GENEROS,
     tarifas: req.body.tarifas || [
       { dias: 1, costo_bs: 2 },
       { dias: 2, costo_bs: 3 },

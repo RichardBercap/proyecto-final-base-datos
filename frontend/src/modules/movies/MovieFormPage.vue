@@ -12,15 +12,31 @@ import Input from '@/components/ui/input/Input.vue'
 import Label from '@/components/ui/label/Label.vue'
 import Textarea from '@/components/ui/textarea/Textarea.vue'
 import { useMoviesStore } from '@/stores/movies.store'
+import { useSettingsStore } from '@/stores/settings.store'
 import { useUiStore } from '@/stores/ui.store'
 import type { MoviePayload } from '@/types/movie'
 
 const route = useRoute()
 const router = useRouter()
 const moviesStore = useMoviesStore()
+const settingsStore = useSettingsStore()
 const uiStore = useUiStore()
 const movieId = computed(() => String(route.params.id || ''))
 const isEdit = computed(() => Boolean(movieId.value))
+const defaultGenres = [
+  'Accion',
+  'Aventura',
+  'Animacion',
+  'Ciencia ficcion',
+  'Comedia',
+  'Crimen',
+  'Documental',
+  'Drama',
+  'Fantasia',
+  'Terror',
+  'Romance',
+  'Suspenso'
+]
 
 const schema = toTypedSchema(
   z.object({
@@ -84,7 +100,14 @@ const wins = computed({
   }
 })
 
+const configuredGenres = computed(() => {
+  const genres = settingsStore.activeSettings?.generos?.length ? settingsStore.activeSettings.generos : defaultGenres
+  const currentGenre = form.genero.trim()
+  return currentGenre && !genres.includes(currentGenre) ? [currentGenre, ...genres] : genres
+})
+
 onMounted(async () => {
+  await settingsStore.fetchActiveSettings()
   if (!isEdit.value) return
   await moviesStore.fetchMovie(movieId.value)
   if (moviesStore.selectedMovie) Object.assign(form, moviesStore.selectedMovie)
@@ -133,7 +156,10 @@ const submit = async () => {
       </div>
       <div>
         <Label>Género</Label>
-        <Input v-model="form.genero" required />
+        <select v-model="form.genero" required class="focus-ring h-11 w-full rounded-xl border border-white/10 bg-slate-950/80 px-3 text-sm text-slate-100">
+          <option disabled value="">Seleccionar género</option>
+          <option v-for="item in configuredGenres" :key="item" :value="item">{{ item }}</option>
+        </select>
       </div>
       <div>
         <Label>Año</Label>

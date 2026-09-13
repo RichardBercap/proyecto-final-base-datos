@@ -18,6 +18,7 @@ export interface Settings {
   vigente_hasta?: string
   moneda: string
   maximo_dias_prestamo: number
+  generos: string[]
   tarifas: RateRule[]
   descuentos: DiscountRule[]
   fecha_creacion?: string

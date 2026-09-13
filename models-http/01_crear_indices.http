@@ -174,6 +174,7 @@ PUT configuraciones
       "vigente_hasta": { "type": "date" },
       "moneda": { "type": "keyword" },
       "maximo_dias_prestamo": { "type": "short" },
+      "generos": { "type": "keyword" },
       "tarifas": {
         "type": "nested",
         "properties": {

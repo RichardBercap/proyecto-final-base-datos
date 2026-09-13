@@ -57,6 +57,16 @@ onMounted(async () => {
   await moviesStore.searchMovies(search.value)
 })
 
+watch(
+  () => route.query.q,
+  (value) => {
+    const nextSearch = String(value || '')
+    if (nextSearch === search.value) return
+    search.value = nextSearch
+    page.value = 1
+  }
+)
+
 watch(page, (value) => {
   if (value > pages.value) page.value = pages.value
 })
@@ -73,7 +83,7 @@ watch(page, (value) => {
 
   <Card class="mb-6 p-4">
     <div class="grid gap-3 md:grid-cols-[1.4fr_1fr_1fr_1fr_auto]">
-      <Input v-model="search" placeholder="Buscar en servidor por título, género, actor u Oscar" />
+      <Input v-model="search" placeholder="Buscar por título, género, actor u Oscar" />
       <select v-model="genre" class="focus-ring h-11 rounded-xl border border-white/10 bg-slate-950 px-3 text-sm">
         <option value="">Todos los géneros</option>
         <option v-for="item in genres" :key="item" :value="item">{{ item }}</option>

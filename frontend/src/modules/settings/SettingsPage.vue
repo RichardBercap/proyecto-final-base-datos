@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, watchEffect } from 'vue'
+import { computed, onMounted, reactive, watchEffect } from 'vue'
 import PageHeader from '@/components/common/PageHeader.vue'
 import Button from '@/components/ui/button/Button.vue'
 import Card from '@/components/ui/card/Card.vue'
@@ -20,6 +20,20 @@ const form = reactive<SettingsPayload>({
   vigente_desde: new Date().toISOString(),
   moneda: 'BOB',
   maximo_dias_prestamo: 5,
+  generos: [
+    'Accion',
+    'Aventura',
+    'Animacion',
+    'Ciencia ficcion',
+    'Comedia',
+    'Crimen',
+    'Documental',
+    'Drama',
+    'Fantasia',
+    'Terror',
+    'Romance',
+    'Suspenso'
+  ],
   tarifas: [
     { dias: 1, costo_bs: 2 },
     { dias: 2, costo_bs: 3 },
@@ -35,6 +49,13 @@ const form = reactive<SettingsPayload>({
 })
 
 onMounted(settingsStore.fetchActiveSettings)
+
+const genresText = computed({
+  get: () => form.generos.join(', '),
+  set: (value: string) => {
+    form.generos = value.split(',').map((item) => item.trim()).filter(Boolean)
+  }
+})
 
 watchEffect(() => {
   if (settingsStore.activeSettings) {
@@ -52,6 +73,7 @@ const submit = async () => {
     moneda: form.moneda,
     version: Number(form.version),
     maximo_dias_prestamo: Number(form.maximo_dias_prestamo),
+    generos: form.generos,
     tarifas: form.tarifas.map((rate) => ({
       dias: Number(rate.dias),
       costo_bs: Number(rate.costo_bs)
@@ -93,6 +115,11 @@ const submit = async () => {
           <Label>Máximo días</Label>
           <Input v-model="form.maximo_dias_prestamo" type="number" />
         </div>
+      </div>
+
+      <div>
+        <Label>Géneros</Label>
+        <Input v-model="genresText" placeholder="Drama, Comedia, Suspenso" />
       </div>
 
       <div>
