@@ -195,7 +195,7 @@ PUT configuraciones
   }
 }
 
-### 5. PRESTAMOS Y FACTURAS
+### 5. PRESTAMOS 
 PUT prestamos
 {
   "settings": {

@@ -1,6 +1,8 @@
 # Backend Video Club
 
-Backend Node.js con Express para administrar peliculas, copias, clientes, prestamos y configuraciones usando Elasticsearch.
+API REST construida con Node.js y Express para administrar el sistema de videoclub. Este backend centraliza la logica de negocio de peliculas, copias, clientes, prestamos y configuraciones, usando Elasticsearch como base de datos y motor de busqueda.
+
+Su responsabilidad principal es recibir las solicitudes del frontend, validar los datos basicos, ejecutar operaciones sobre los indices de Elasticsearch y devolver respuestas JSON consistentes.
 
 ## Requisitos
 
@@ -8,9 +10,10 @@ Backend Node.js con Express para administrar peliculas, copias, clientes, presta
 - Elasticsearch local en `http://localhost:9200`
 - Indices creados: `peliculas`, `copias`, `clientes`, `prestamos`, `configuraciones`
 
-## Instalacion
+## Instalacion y ejecucion
 
 ```bash
+cd backend
 npm install
 cp .env.example .env
 npm run dev
@@ -28,6 +31,27 @@ npm start
 ELASTICSEARCH_NODE=http://localhost:9200
 PORT=3000
 ```
+
+## Estructura
+
+```text
+src/
+├── app.js                  # Configuracion de Express y rutas
+├── server.js               # Punto de arranque del servidor
+├── config/                 # Conexion y parametros de Elasticsearch
+├── controllers/            # Controladores por recurso
+├── routes/                 # Definicion de endpoints REST
+├── services/               # Acceso a Elasticsearch
+└── utils/                  # Helpers de errores y async handlers
+```
+
+## Modulos principales
+
+- Peliculas: creacion, actualizacion, listado, detalle y busqueda textual.
+- Copias: registro de copias disponibles, consulta de disponibilidad y baja logica.
+- Clientes: registro, actualizacion, detalle, listado y bloqueo.
+- Prestamos: creacion de prestamos, consulta y devolucion.
+- Configuraciones: manejo de tarifas y reglas activas del negocio.
 
 ## Endpoints
 
@@ -108,3 +132,9 @@ Devolver prestamo:
 curl -X PATCH http://localhost:3000/api/prestamos/PRE-002/devolver
 ```
 
+## Flujo esperado
+
+1. Levantar Elasticsearch con `docker compose up -d` desde la raiz del proyecto.
+2. Crear los indices y datos iniciales usando los archivos de `models-http`.
+3. Ejecutar el backend con `npm run dev`.
+4. Consumir la API desde el frontend o desde herramientas como curl, Postman, REST Client o Kibana.

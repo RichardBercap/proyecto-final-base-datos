@@ -1,6 +1,8 @@
 # Blockflix Rental Frontend
 
-Aplicación Vue 3 + TypeScript para consumir el backend Express del videoclub con Elasticsearch.
+Aplicacion web construida con Vue 3 y TypeScript para operar el sistema de videoclub desde el navegador. Consume el backend Express del proyecto y presenta una interfaz administrativa para gestionar peliculas, clientes, prestamos, copias y configuraciones.
+
+El frontend esta pensado como una experiencia tipo dashboard: muestra metricas, permite buscar informacion rapidamente y organiza los flujos principales del negocio en vistas separadas.
 
 ## Instalación
 
@@ -47,6 +49,12 @@ El proyecto sigue Feature Based Architecture:
 - `src/utils`: formato, paginación y helpers.
 - `src/composables`: lógica reusable.
 - `src/styles`: Tailwind y tokens visuales.
+
+## Flujo de la aplicacion
+
+El usuario puede navegar entre vistas administrativas para consultar el estado general del videoclub, registrar o editar peliculas, administrar clientes, iniciar nuevos prestamos y revisar configuraciones de negocio. La vista de catalogo permite mostrar peliculas disponibles con una experiencia mas orientada al cliente.
+
+La comunicacion con el backend se concentra en `src/services` y `src/api/http.ts`, mientras que el estado de cada dominio se gestiona con Pinia en `src/stores`.
 
 ## Vistas principales
 
